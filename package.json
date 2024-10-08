@@ -1,0 +1,20 @@
+{
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.7",
+    "@types/express": "^5.0.0",
+    "nodemon": "^3.1.7",
+    "yarn": "^1.22.22"
+  },
+  "name": "tck_express",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/alsgeun/tck_express.git",
+  "author": "<mgeun97@naver.com>",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2"
+  }
+}

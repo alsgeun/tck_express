@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  userId Int @id @default(autoincrement()) @map("userId")
+  email String @unique @map("email")
+  userName String @map("userName")
+  points  Int   @map("points")
+  is_Admin  Boolean @map("is_Admin")
+
+  books Books[]
+  @@map("Users")
+}
+
+model Shows {
+  showId Int @id @default(autoincrement()) @map("showId")
+  showName String @unique @map("showName")
+  description String @db.Text @map("description")
+  category category @map("category")
+  venue String @map("venue")
+  price Int @map("price")
+  performer String @map("performer")
+  image String @map("image")
+
+  schedules Schedules[]
+  @@map("Shows")
+}
+
+enum category {
+  sports
+  musical
+  concert
+  drama
+  classic
+  etc
+}
+
+model Schedules {
+  scheduleId Int @id @default(autoincrement()) @map("scheduleId")
+  showId Int @map("showId")
+  date  DateTime  @map("date")
+  time  DateTime  @map("time")
+
+  show Shows @relation(fields: [showId], references: [showId], onDelete: Cascade)
+  seats Seats?
+  books Books[]
+  @@map("Schedules")
+}
+
+model Seats {
+  seatId Int @id @default(autoincrement()) @map("seatId")
+  scheduleId Int @unique @map("scheduleId")
+  availableSeat Int @map("availableSeat")
+  totalSeat Int @map("totalSeat")
+
+  schedules Schedules @relation(fields: [scheduleId], references: [scheduleId], onDelete: Cascade)
+  @@map("Seats")
+}
+
+model Books {
+  bookId Int @id @default(autoincrement())  @map("bookId")
+  userId Int @map("userId")
+  scheduleId Int @map("schedule")
+
+  user Users @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  schedule Schedules @relation(fields: [scheduleId], references: [scheduleId], onDelete: Cascade)
+  @@map("Books")
+}
