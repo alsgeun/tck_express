@@ -17,18 +17,24 @@ model Users {
   userId Int @id @default(autoincrement()) @map("userId")
   email String @unique @map("email")
   userName String @map("userName")
-  points  Int   @map("points")
-  is_Admin  Boolean @map("is_Admin")
+  password String @map("password")
+  points  Int   @default(1000000) @map("points")
+  role  role @map("role")
 
   books Books[]
   @@map("Users")
+}
+
+enum role {
+  user
+  producer
 }
 
 model Shows {
   showId Int @id @default(autoincrement()) @map("showId")
   showName String @unique @map("showName")
   description String @db.Text @map("description")
-  category category @map("category")
+  category category @default(unspecified) @map("category")
   venue String @map("venue")
   price Int @map("price")
   performer String @map("performer")
@@ -45,6 +51,7 @@ enum category {
   drama
   classic
   etc
+  unspecified
 }
 
 model Schedules {

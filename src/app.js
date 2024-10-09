@@ -5,6 +5,7 @@ import router from "../src/router.js"
 const app = express();
 const PORT = 3020;
 
+app.use(express.json())
 app.use(cookieParser());
 app.use('/', router)
 
