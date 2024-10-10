@@ -11,6 +11,7 @@ export default async(req, res, next) => {
     const [tokenType,token] = authorization.split(' ')
 
     if (tokenType !== 'Bearer') throw new Error ('토큰 타입 형식이 Bearer가 아닙니다.')
+    if (!token) return res.status(400).json({ message : '인증 정보가 올바르지 않습니다.' })
     
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET)
     const userId = decodedToken.userId
@@ -25,6 +26,8 @@ export default async(req, res, next) => {
     
     next()
     } catch (error) {
+    res.clearCookie('authorization')
+    if (error.name === 'TokenExpiredError') return res.status(401).json({ message : '토큰이 만료되었습니다.'})
     return res.status(400).json({message: error.message})
     }
 }
