@@ -31,4 +31,9 @@ export class UsersService {
         const token = jwt.sign({ userId: user.userId }, process.env.JWT_SECRET, {expiresIn: "12h"});
         return token
     }
+
+    profile = async(userId) => {
+        const user = await this.usersRepository.profile(userId)
+        return user
+    }
 }

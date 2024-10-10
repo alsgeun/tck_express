@@ -5,9 +5,9 @@ export class UsersController {
 
     signUp = async(req, res) => {
         try {
-        const {email, name, password, passwordConfirm, role} = req.body
+        const { email, name, password, passwordConfirm, role } = req.body
         await this.usersService.signUp(email, name, password, passwordConfirm, role)
-        return res.status(201).json({message : "회원가입 완료"})
+        return res.status(201).json({ message : '회원가입 완료' })
         } catch (error) {
             return res.status(400).json({ message: error.message });
         }
@@ -15,13 +15,23 @@ export class UsersController {
 
     signIn = async(req, res) => {
         try {
-        const {email, password} = req.body
+        const { email, password } = req.body
         const tokens = await this.usersService.signIn(email, password)
         
-        res.cookie("authorization", `Bearer ${tokens}`)
-        return res.status(200).json({message : "로그인 성공"})
+        res.cookie('authorization', `Bearer ${ tokens }`)
+        return res.status(200).json({ message : '로그인 성공' })
         } catch (error) {
             return res.status(400).json({ message : error.message })
         } 
+    }
+
+    profile = async(req, res) => {
+        try {
+        const { userId } = req.user
+        const user = await this.usersService.profile(userId)
+        return res.status(201).json({ data : user })
+        } catch (error) {
+            return res.status(401).json({ message : error.message })
+        }
     }
 }

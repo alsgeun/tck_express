@@ -29,4 +29,20 @@ export class UsersRepository {
             throw new Error("이메일이 존재하지 않거나 비밀번호가 일치하지 않습니다.")
         return foundUser
     }
+
+    profile = async(userId) => {
+        const user = await prisma.users.findUnique({
+            where : {
+                userId : +userId
+            },
+            select : {
+                userId : true,
+                email : true,
+                userName : true,
+                points : true,
+                role : true
+            }
+        })
+        return user
+    }
 }
