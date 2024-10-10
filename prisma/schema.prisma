@@ -34,11 +34,11 @@ model Shows {
   showId Int @id @default(autoincrement()) @map("showId")
   showName String @unique @map("showName")
   description String @db.Text @map("description")
-  category category @default(unspecified) @map("category")
+  category category @map("category")
   venue String @map("venue")
   price Int @map("price")
   performer String @map("performer")
-  image String @map("image")
+  image String? @map("image")
 
   schedules Schedules[]
   @@map("Shows")
@@ -51,14 +51,13 @@ enum category {
   drama
   classic
   etc
-  unspecified
 }
 
 model Schedules {
   scheduleId Int @id @default(autoincrement()) @map("scheduleId")
   showId Int @map("showId")
-  date  DateTime  @map("date")
-  time  DateTime  @map("time")
+  date String @map("date")
+  time  String  @map("time")
 
   show Shows @relation(fields: [showId], references: [showId], onDelete: Cascade)
   seats Seats?
