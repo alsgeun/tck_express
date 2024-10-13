@@ -18,4 +18,17 @@ export class ShowsController {
         }
         
     }
+
+    search = async(req, res) => {
+        try {
+        const { searchWord } = req.body
+
+        const shows = await this.showsService.search(searchWord)
+        
+        return res.status(200).json({ data : shows })
+        } catch (error) {
+            return res.status(400).json({ message : error.message })
+        }
+        
+    }
 }

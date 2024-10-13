@@ -37,4 +37,20 @@ export class ShowsService {
         const show = await this.showsRepository.register(showName, description, category, venue, price, performer, image, date, time, totalSeat)
         return show
     }
+
+    search = async(searchWord) => {
+        if (searchWord.length === 0) {
+        const allShows = await this.showsRepository.findAllShows()
+            if (!allShows) {
+                throw new Error('공연을 찾지 못했습니다.')
+            }
+            return allShows
+        }
+
+        const shows = await this.showsRepository.findShows(searchWord)
+        if (!shows) {
+            throw new Error('공연을 찾지 못했습니다.')
+        }
+        return shows
+    }
 }

@@ -7,6 +7,47 @@ export class ShowsRepository {
         return show
     }
 
+    findAllShows = async() => {
+        const allShows = await prisma.shows.findMany({
+            select : {
+                showName : true,
+                venue : true,
+                price : true,
+                performer : true,
+                schedules : {
+                    select : {
+                        date : true,
+                        time : true 
+                    }
+                }
+            }
+        })
+        return allShows
+    }
+
+    findShows = async(searchWord) => {
+        const shows = await prisma.shows.findMany ({
+            where : {
+                showName : {
+                    contains : `${searchWord}`
+                }
+            },
+            select : {
+                showName : true,
+                venue : true,
+                price : true,
+                performer : true,
+                schedules : {
+                    select : {
+                        date : true,
+                        time : true 
+                    }
+                }
+            }
+        })
+        return shows
+    }
+
     register = async(showName, description, category, venue, price, performer, image, date, time, totalSeat) => {
         const showInfo = await prisma.shows.create({
             data : {
@@ -35,4 +76,6 @@ export class ShowsRepository {
         })
         return { showInfo, showSchedules, showTotalSeats }
     }
+
+    
 }

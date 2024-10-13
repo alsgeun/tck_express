@@ -6,5 +6,5 @@ const router = express.Router()
 const showsController = new ShowsController()
 
 router.post('/', authMiddleware, showsController.register)
-
+router.post('/search', showsController.search)
 export default router
