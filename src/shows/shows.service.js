@@ -53,4 +53,11 @@ export class ShowsService {
         }
         return shows
     }
+
+    detailShow = async(showId) => {
+        const show = await this.showsRepository.findDetailShowWithId(showId)
+        if (!show)
+            throw new Error('공연을 찾지 못했습니다.')
+        return show
+    }
 }

@@ -48,6 +48,36 @@ export class ShowsRepository {
         return shows
     }
 
+    findDetailShowWithId = async(showId) => {
+        const show = await prisma.shows.findUnique({
+            where : {
+                showId : +showId
+            },
+            select : {
+                showId : true,
+                showName : true,
+                description : true,
+                category : true,
+                venue : true,
+                price : true,
+                performer : true,
+                image : true,
+                schedules : {
+                    select : {
+                        date : true,
+                        time : true,
+                        seats : {
+                            select : {
+                                availableSeat : true,
+                                totalSeat : true
+                            }
+                        }
+                    }
+                }
+            }
+        })
+        return show
+    }
     register = async(showName, description, category, venue, price, performer, image, date, time, totalSeat) => {
         const showInfo = await prisma.shows.create({
             data : {
