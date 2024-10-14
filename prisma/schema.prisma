@@ -21,6 +21,7 @@ model Users {
   points  Int   @default(1000000) @map("points")
   role  role @map("role")
 
+  shows Shows[]
   books Books[]
   @@map("Users")
 }
@@ -32,7 +33,8 @@ enum role {
 
 model Shows {
   showId Int @id @default(autoincrement()) @map("showId")
-  showName String @unique @map("showName")
+  userId Int @map("userId")
+  showName String  @unique @map("showName")
   description String @db.Text @map("description")
   category category @map("category")
   venue String @map("venue")
@@ -40,7 +42,9 @@ model Shows {
   performer String @map("performer")
   image String? @map("image")
 
+  user Users @relation(fields: [userId], references: [userId], onDelete: Cascade)
   schedules Schedules[]
+  @@unique([userId, showName])
   @@map("Shows")
 }
 
@@ -51,6 +55,7 @@ enum category {
   drama
   classic
   etc
+  past
 }
 
 model Schedules {
@@ -58,11 +63,18 @@ model Schedules {
   showId Int @map("showId")
   date String @map("date")
   time  String  @map("time")
+  dateTime DateTime @map("dateTime")
+  booksStatus books @map("booksStatus")
 
   show Shows @relation(fields: [showId], references: [showId], onDelete: Cascade)
   seats Seats?
   books Books[]
   @@map("Schedules")
+}
+
+enum books {
+  possible
+  impossible
 }
 
 model Seats {
