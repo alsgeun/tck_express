@@ -5,11 +5,11 @@ export class ShowsController {
 
     register = async(req, res) => {
         try {
-        const { role } = req.user
+        const { userId, role } = req.user
         const { showName, description, category, venue, price, performer, image, date, time, totalSeat } = req.body
         
         const show = await this.showsService.register(
-            role, showName, description, category, venue, price, performer, image, date, time, totalSeat
+            userId, role, showName, description, category, venue, price, performer, image, date, time, totalSeat
         )
         
         return res.status(200).json({ message : '공연 등록완료', data : show})
@@ -38,6 +38,19 @@ export class ShowsController {
             const show = await this.showsService.detailShow(showId)
             return res.status(200).json({ data : show })
         } catch (error){
+            return res.status(400).json({ message : error.message })
+        }
+    }
+
+    standing = async(req, res) => {
+        try {
+            const { scheduleId, seatEA } = req.body
+            const { userId, points } = req.user
+
+            await this.showsService.standing(scheduleId, seatEA, userId, points)
+            
+            return res.status(200).json({ message : '예매 완료' })
+        } catch (error) {
             return res.status(400).json({ message : error.message })
         }
     }

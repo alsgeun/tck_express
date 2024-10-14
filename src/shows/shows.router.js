@@ -8,4 +8,6 @@ const showsController = new ShowsController()
 router.post('/', authMiddleware, showsController.register)
 router.post('/search', showsController.search)
 router.post('/:showId', showsController.detailShow)
+router.post('/:showId/standingBooks', authMiddleware, showsController.standing)
+
 export default router

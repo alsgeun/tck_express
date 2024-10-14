@@ -66,6 +66,7 @@ export class ShowsRepository {
                     select : {
                         date : true,
                         time : true,
+                        booksStatus : true,
                         seats : {
                             select : {
                                 availableSeat : true,
@@ -78,34 +79,142 @@ export class ShowsRepository {
         })
         return show
     }
-    register = async(showName, description, category, venue, price, performer, image, date, time, totalSeat) => {
-        const showInfo = await prisma.shows.create({
-            data : {
-                showName,
-                description,
-                category,
-                venue,
-                price : +price,
-                performer,
-                image
-            }
-        })
-        const showSchedules = await prisma.schedules.create({
-            data : {
-                showId : showInfo.showId,
-                date,
-                time
-            }
-        })
-        const showTotalSeats = await prisma.seats.create({
-            data : {
-                scheduleId : showSchedules.scheduleId,
-                availableSeat : +totalSeat,
-                totalSeat : +totalSeat
-            }
-        })
-        return { showInfo, showSchedules, showTotalSeats }
-    }
 
-    
+    register = async(userId, showName, description, category, venue, price, performer, image, date, time, dateTime, totalSeat) => {
+        const existingShow = await prisma.shows.findUnique({
+            where: {
+                userId_showName: {
+                    userId: +userId,
+                    showName: showName,
+                },
+            },
+        });
+
+        let showInfo;
+
+        if (existingShow) {
+            showInfo = await prisma.shows.update({
+                where: {
+                    userId_showName: {
+                        userId: +userId,
+                        showName: showName,
+                    },
+                },
+                data: {
+                    description,
+                    category,
+                    venue,
+                    price: +price,
+                    performer,
+                    image,
+                },
+            });
+        } else {
+            showInfo = await prisma.shows.create({
+                data: {
+                    userId: +userId,
+                    showName,
+                    description,
+                    category,
+                    venue,
+                    price: +price,
+                    performer,
+                    image,
+                },
+            });
+        }
+
+        const showSchedules = await prisma.schedules.create({
+            data: {
+                showId: showInfo.showId,
+                date,
+                time,
+                dateTime,
+                booksStatus: 'possible',
+            },
+        });
+
+        const showTotalSeats = await prisma.seats.create({
+            data: {
+                scheduleId: showSchedules.scheduleId,
+                availableSeat: +totalSeat,
+                totalSeat: +totalSeat,
+            },
+        });
+
+        return { showInfo, showSchedules, showTotalSeats };
+};
+    //     const showInfo = await prisma.shows.upsert({
+    //         where : {
+    //             userId_showName: {
+    //                 userId: +userId,
+    //                 showName: showName
+    //             }
+    //         },
+    //         update : {
+    //             showName,
+    //             userId : +userId,
+    //             description,
+    //             category,
+    //             venue,
+    //             price : +price,
+    //             performer,
+    //             image
+    //         },
+    //         create : {
+    //             showName,
+    //             userId : +userId,
+    //             description,
+    //             category,
+    //             venue,
+    //             price : +price,
+    //             performer,
+    //             image
+    //         }
+    //     })
+
+    //     const showSchedules = await prisma.schedules.create({
+    //         data : {
+    //             showId : showInfo.showId,
+    //             date,
+    //             time,
+    //             dateTime,
+    //             booksStatus : 'possible'
+    //         }
+    //     })
+
+    //     const showTotalSeats = await prisma.seats.create({
+    //         data : {
+    //             scheduleId : showSchedules.scheduleId,
+    //             availableSeat : +totalSeat,
+    //             totalSeat : +totalSeat
+    //         }
+    //     })
+    //     return { showInfo, showSchedules, showTotalSeats }
+    // }
+
+    updateShowStatus = async() => {
+        const nowDateTime = new Date()
+        const updatedBooksStatus = await prisma.schedules.updateMany({
+            where : {
+                dateTime : {
+                    lt : nowDateTime
+                }
+            },
+            data : {
+                booksStatus : 'impossible'
+            }
+        })
+
+        if (updatedBooksStatus.schedules.booksStatus === 'impossible') {
+            await prisma.shows.update({
+                where : {
+                    showId : updatedBooksStatus.showId
+                },
+                data : {
+                    category : 'past'
+                }
+            })
+        }
+    }
 }

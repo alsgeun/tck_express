@@ -39,4 +39,15 @@ export class UsersRepository {
         })
         return user
     }
+
+    updatePoints = async(userId, points) => {
+        await prisma.users.update({
+            where : {
+                userId : +userId
+            },
+            data : {
+                points : +points
+            }
+        })
+    }
 }

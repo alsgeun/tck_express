@@ -1,9 +1,17 @@
 import { ShowsRepository } from "./shows.repository.js"
+import { SchedulesRepository } from "../schedules/schedules.repository.js"
+import { BooksRepository } from "../books/books.repository.js"
+import { UsersRepository } from "../users/users.repository.js"
+import { SeatsRepository } from "../seats/seats.repository.js"
 
 export class ShowsService {
     showsRepository = new ShowsRepository()
+    schedulesRepository = new SchedulesRepository()
+    booksRepository = new BooksRepository()
+    usersRepository = new UsersRepository()
+    seatsRepository = new SeatsRepository()
 
-    register = async(role, showName, description, category, venue, price, performer, image, date, time, totalSeat) => {
+    register = async(userId, role, showName, description, category, venue, price, performer, image, date, time, totalSeat) => {
         
         if (role !== 'producer')
             throw new Error('공연 제작자만 공연 등록이 가능합니다. 제작자로 회원가입 해주세요.')
@@ -31,11 +39,29 @@ export class ShowsService {
             throw new Error('공연 카테고리를 제대로 입력해주세요.')
 
         const overlappingShow = await this.showsRepository.findShow(showName)
-        if (overlappingShow)
+        if (overlappingShow) {
             throw new Error('중복된 공연 이름입니다.')
+        }
+
+        if (date.includes('~')) {
+            throw new Error('날짜에는 "~"를 사용할 수 없습니다.');
+        }
+
+        // 입력 받은 날짜에 대한 나름의 유효성 검사(',' 포함-> ,을 기준으로 나눔, 공백제거, '.'이있으면 '-'으로 변환 등)
+        // 과정을 거친 date 객체로 변환
+        const dateArr = date.includes(',') ? date.split(',') : [date]
+        const arrangementDates = dateArr.map(a => new Date(a.trim().replace(/\./g, '-')))
         
-        const show = await this.showsRepository.register(showName, description, category, venue, price, performer, image, date, time, totalSeat)
-        return show
+        const results = []
+
+        for (const arrangementDate of arrangementDates) {
+            const isoDateTime = `${arrangementDate.toISOString().split('T')[0]}T${time}:00`
+        const dateTime = new Date(isoDateTime)
+        const result = await this.showsRepository.register(userId, showName, description, category, venue, price, performer, image, date, time, dateTime, totalSeat)
+        results.push(result)
+        }
+
+        return results
     }
 
     search = async(searchWord) => {
@@ -59,5 +85,36 @@ export class ShowsService {
         if (!show)
             throw new Error('공연을 찾지 못했습니다.')
         return show
+    }
+
+    standing = async(scheduleId, seatEA, userId, points) => {
+        const schedules = await this.schedulesRepository.findSchedules(scheduleId)
+
+        if (!schedules)
+            throw new Error('해당 공연 회차가 존재하지 않습니다.')
+        if (schedules.show.category === 'past')
+            throw new Error('지난 공연입니다.')
+        if (schedules.booksStatus === 'impossible')
+            throw new Error('예매가 불가능한 회차입니다.')
+
+        // 예매내역 생성
+        await this.booksRepository.records(schedules.scheduleId, userId)
+
+        const price = schedules.show.price
+        const userPoints = points - price
+
+        // 포인트 차감
+        await this.usersRepository.updatePoints(userId, userPoints)
+
+        // 좌석 갯수 차감
+        const seat = schedules.seats.availableSeat
+        if (seatEA > seat)
+            throw new Error(`최대 ${seat}석 까지만 예약이 가능합니다.`)
+        const remainingSeat = seat - seatEA
+        const updatedSeat = await this.seatsRepository.updateSeat(schedules.scheduleId, remainingSeat)
+
+        // 예매 후 매진시 예매 불가능으로 상태 변경
+        if (updatedSeat.availableSeat === 0)
+            await this.schedulesRepository.changeStatus(updatedSeat.scheduleId)
     }
 }
