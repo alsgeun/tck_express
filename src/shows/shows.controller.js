@@ -46,8 +46,9 @@ export class ShowsController {
         try {
             const { scheduleId, seatEA } = req.body
             const { userId, points } = req.user
+            const { showId } = req.params
 
-            await this.showsService.standing(scheduleId, seatEA, userId, points)
+            await this.showsService.standing(scheduleId, seatEA, userId, points, showId)
             
             return res.status(200).json({ message : '예매 완료' })
         } catch (error) {

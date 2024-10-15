@@ -64,6 +64,7 @@ export class ShowsRepository {
                 image : true,
                 schedules : {
                     select : {
+                        scheduleId : true,
                         date : true,
                         time : true,
                         booksStatus : true,
@@ -144,6 +145,7 @@ export class ShowsRepository {
 
         return { showInfo, showSchedules, showTotalSeats };
     }
+
     updateShowStatus = async() => {
         const nowDateTime = new Date()
         const updatedBooksStatus = await prisma.schedules.updateMany({

@@ -1,7 +1,7 @@
 import { prisma } from '../../prisma/index.js'
 
 export class SeatsRepository {
-    updateSeat = async(scheduleId, seat) => {
+    updateSeat = async(scheduleId, seat, showId) => {
         const updatedSeat = await prisma.seats.update({
             where : {
                 scheduleId : +scheduleId
@@ -11,6 +11,15 @@ export class SeatsRepository {
                 availableSeat : +seat
             }
         })
-        return updatedSeat
+        const updatedShow = await prisma.schedules.update({
+            where : {
+                scheduleId : +scheduleId
+            },
+            data : {
+                showId : +showId,
+                scheduleId : +scheduleId
+            }
+        })
+        return { updatedSeat, updatedShow }
     }
 }

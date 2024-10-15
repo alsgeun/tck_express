@@ -71,14 +71,15 @@ export class ShowsService {
     search = async(searchWord) => {
         if (searchWord.length === 0) {
         const allShows = await this.showsRepository.findAllShows()
-            if (!allShows) {
+            if (!allShows || allShows.length === 0) {
                 throw new Error('공연을 찾지 못했습니다.')
             }
             return allShows
         }
-
+        
         const shows = await this.showsRepository.findShows(searchWord)
-        if (!shows) {
+        
+        if (!shows || shows.length === 0) {
             throw new Error('공연을 찾지 못했습니다.')
         }
         return shows
@@ -91,7 +92,19 @@ export class ShowsService {
         return show
     }
 
-    standing = async(scheduleId, seatEA, userId, points) => {
+    standing = async(scheduleId, seatEa, userId, points, showId) => {
+        if (!showId)
+            throw new Error('올바른 접근이 아닙니다.')
+
+        const show = await this.showsRepository.findDetailShowWithId(showId)
+        
+        if (!show) 
+            throw new Error('존재하지 않는 공연입니다.')
+
+        const scheduleIdInShows = show.schedules.map(shows => shows.scheduleId)
+        if (!scheduleIdInShows.includes(scheduleId))
+            throw new Error('존재하지 않는 공연 회차입니다.')
+
         const schedules = await this.schedulesRepository.findSchedules(scheduleId)
 
         if (!schedules)
@@ -102,20 +115,23 @@ export class ShowsService {
             throw new Error('예매가 불가능한 회차입니다.')
 
         // 예매내역 생성
-        await this.booksRepository.records(schedules.scheduleId, userId)
+        await this.booksRepository.records(schedules.scheduleId, userId, show.showId, seatEa)
 
         const price = schedules.show.price
-        const userPoints = points - price
+        const userPoints = points - (price * seatEa)
+
+        if (points < (price * seatEa))
+            throw new Error('포인트가 부족합니다.')
 
         // 포인트 차감
         await this.usersRepository.updatePoints(userId, userPoints)
 
         // 좌석 갯수 차감
         const seat = schedules.seats.availableSeat
-        if (seatEA > seat)
+        if (seatEa > seat)
             throw new Error(`최대 ${seat}석 까지만 예약이 가능합니다.`)
-        const remainingSeat = seat - seatEA
-        const updatedSeat = await this.seatsRepository.updateSeat(schedules.scheduleId, remainingSeat)
+        const remainingSeat = seat - seatEa
+        const updatedSeat = await this.seatsRepository.updateSeat(schedules.scheduleId, remainingSeat, showId)
 
         // 예매 후 매진시 예매 불가능으로 상태 변경
         if (updatedSeat.availableSeat === 0)
