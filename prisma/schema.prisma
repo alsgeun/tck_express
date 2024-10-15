@@ -44,6 +44,7 @@ model Shows {
 
   user Users @relation(fields: [userId], references: [userId], onDelete: Cascade)
   schedules Schedules[]
+  books Books[]
   @@unique([userId, showName])
   @@map("Shows")
 }
@@ -88,11 +89,13 @@ model Seats {
 }
 
 model Books {
-  bookId Int @id @default(autoincrement())  @map("bookId")
+  bookId Int @id @unique @default(autoincrement())  @map("bookId")
   userId Int @map("userId")
-  scheduleId Int @map("schedule")
+  scheduleId Int @map("scheduleId")
+  showId Int @map("showId")
 
   user Users @relation(fields: [userId], references: [userId], onDelete: Cascade)
   schedule Schedules @relation(fields: [scheduleId], references: [scheduleId], onDelete: Cascade)
+  show Shows @relation(fields: [showId], references: [showId], onDelete: Cascade)
   @@map("Books")
 }
