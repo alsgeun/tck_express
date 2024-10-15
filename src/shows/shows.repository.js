@@ -88,7 +88,7 @@ export class ShowsRepository {
                     showName: showName,
                 },
             },
-        });
+        })
 
         let showInfo;
 
@@ -108,7 +108,7 @@ export class ShowsRepository {
                     performer,
                     image,
                 },
-            });
+            })
         } else {
             showInfo = await prisma.shows.create({
                 data: {
@@ -121,7 +121,7 @@ export class ShowsRepository {
                     performer,
                     image,
                 },
-            });
+            })
         }
 
         const showSchedules = await prisma.schedules.create({
@@ -132,7 +132,7 @@ export class ShowsRepository {
                 dateTime,
                 booksStatus: 'possible',
             },
-        });
+        })
 
         const showTotalSeats = await prisma.seats.create({
             data: {
@@ -140,59 +140,10 @@ export class ShowsRepository {
                 availableSeat: +totalSeat,
                 totalSeat: +totalSeat,
             },
-        });
+        })
 
         return { showInfo, showSchedules, showTotalSeats };
-};
-    //     const showInfo = await prisma.shows.upsert({
-    //         where : {
-    //             userId_showName: {
-    //                 userId: +userId,
-    //                 showName: showName
-    //             }
-    //         },
-    //         update : {
-    //             showName,
-    //             userId : +userId,
-    //             description,
-    //             category,
-    //             venue,
-    //             price : +price,
-    //             performer,
-    //             image
-    //         },
-    //         create : {
-    //             showName,
-    //             userId : +userId,
-    //             description,
-    //             category,
-    //             venue,
-    //             price : +price,
-    //             performer,
-    //             image
-    //         }
-    //     })
-
-    //     const showSchedules = await prisma.schedules.create({
-    //         data : {
-    //             showId : showInfo.showId,
-    //             date,
-    //             time,
-    //             dateTime,
-    //             booksStatus : 'possible'
-    //         }
-    //     })
-
-    //     const showTotalSeats = await prisma.seats.create({
-    //         data : {
-    //             scheduleId : showSchedules.scheduleId,
-    //             availableSeat : +totalSeat,
-    //             totalSeat : +totalSeat
-    //         }
-    //     })
-    //     return { showInfo, showSchedules, showTotalSeats }
-    // }
-
+    }
     updateShowStatus = async() => {
         const nowDateTime = new Date()
         const updatedBooksStatus = await prisma.schedules.updateMany({

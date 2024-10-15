@@ -44,23 +44,27 @@ export class ShowsService {
         }
 
         if (date.includes('~')) {
-            throw new Error('날짜에는 "~"를 사용할 수 없습니다.');
+            throw new Error('날짜에는 "~"를 사용할 수 없습니다.')
         }
 
         // 입력 받은 날짜에 대한 나름의 유효성 검사(',' 포함-> ,을 기준으로 나눔, 공백제거, '.'이있으면 '-'으로 변환 등)
-        // 과정을 거친 date 객체로 변환
-        const dateArr = date.includes(',') ? date.split(',') : [date]
-        const arrangementDates = dateArr.map(a => new Date(a.trim().replace(/\./g, '-')))
-        
+        const stringDate = date.split(',').map(a => a.trim().replace(/\./g, '-'))
+        const stringTime = time.split(',').map(a => a.trim())
+
         const results = []
 
-        for (const arrangementDate of arrangementDates) {
-            const isoDateTime = `${arrangementDate.toISOString().split('T')[0]}T${time}:00`
-        const dateTime = new Date(isoDateTime)
-        const result = await this.showsRepository.register(userId, showName, description, category, venue, price, performer, image, date, time, dateTime, totalSeat)
-        results.push(result)
-        }
+        for (let i = 0; i < stringDate.length; i++) {
+            const dateString = stringDate[i]
+            const timeString = stringTime[i]
 
+            // ISO 형식의 UTC 시간으로 변환 및 date 객체 생성
+            const isoDateTime = `${dateString}T${timeString}:00`
+            const dateTime = new Date(isoDateTime)
+
+            const result = await this.showsRepository.register(userId, showName, description, category, venue, price, performer, image, dateString, timeString, dateTime, totalSeat)
+            results.push(result)
+        }
+        
         return results
     }
 
