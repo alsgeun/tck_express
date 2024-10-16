@@ -6,5 +6,6 @@ const router = express.Router()
 const booksController = new BooksController()
 
 router.get('/list', authMiddleware, booksController.getList)
+router.get('/:bookId/detail', authMiddleware, booksController.detail)
 
 export default router

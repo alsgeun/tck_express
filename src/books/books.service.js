@@ -12,4 +12,15 @@ export class BooksService {
         
         return books
     }
+
+    detail = async(bookId, userId) => {
+        const bookScheduleInfo = await this.booksRepository.bookDetail(bookId, userId)
+        if(!bookScheduleInfo || Object.keys(bookScheduleInfo).length === 0 || bookScheduleInfo === null)
+            throw new Error('예매 정보가 없습니다.')
+
+        const showInfo = await this.booksRepository.showDetail(bookScheduleInfo.showId)
+        if(!showInfo || Object.keys(showInfo).length === 0 || showInfo === null)
+            throw new Error('예매 정보가 없습니다.')
+        return { bookScheduleInfo, showInfo }
+    }
 }
