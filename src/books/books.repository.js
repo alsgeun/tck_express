@@ -61,7 +61,12 @@ export class BooksRepository {
                 schedule : {
                     select : {
                         date : true,
-                        time : true
+                        time : true,
+                        seats : {
+                            select : {
+                                availableSeat : true
+                            }
+                        }
                     }
                 }
             }
@@ -76,5 +81,14 @@ export class BooksRepository {
             }
         })
         return showDetail
+    }
+
+    cancel = async(bookId, userId) => {
+        await prisma.books.delete({
+            where : {
+                bookId : +bookId,
+                userId : +userId
+            }
+        })
     }
 }

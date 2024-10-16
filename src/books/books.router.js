@@ -7,5 +7,6 @@ const booksController = new BooksController()
 
 router.get('/list', authMiddleware, booksController.getList)
 router.get('/:bookId/detail', authMiddleware, booksController.detail)
+router.delete('/:bookId/cancel', authMiddleware, booksController.cancel)
 
 export default router

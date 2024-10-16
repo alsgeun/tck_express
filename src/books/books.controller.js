@@ -28,4 +28,18 @@ export class BooksController {
         }
         
     }
+
+    cancel = async(req, res) => {
+        try {
+            const { bookId } = req.params
+            const { userId } = req.user
+
+            await this.booksService.cancel(bookId, userId)
+            
+            return res.status(200).json({ message : '취소 완료' })
+        } catch(error) {
+            return res.status(400).json({ message : error.message })
+        }
+        
+    }
 }
