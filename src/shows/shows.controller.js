@@ -6,15 +6,25 @@ export class ShowsController {
     register = async(req, res) => {
         try {
         const { userId, role } = req.user
-        const { showName, description, category, venue, price, performer, image, date, time, totalSeat } = req.body
+        const { showName, description, category, venue, price, performer, date, time, totalSeat } = req.body
         
+        let image
+
+        if (req.file) {
+            image = `s3_url/${req.file.originalname}`
+        } else {
+            image = req.body.image
+        }
+
         const show = await this.showsService.register(
             userId, role, showName, description, category, venue, price, performer, image, date, time, totalSeat
         )
         
         return res.status(200).json({ message : '공연 등록완료', data : show})
         } catch (error) {
-            return res.status(400).json({ message : error.message })
+            if (!res.headersSent) {
+                return res.status(400).json({ message: error.message });
+            }
         }
         
     }
