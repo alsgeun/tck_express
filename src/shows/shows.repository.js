@@ -159,15 +159,26 @@ export class ShowsRepository {
             }
         })
 
-        if (updatedBooksStatus.schedules.booksStatus === 'impossible') {
-            await prisma.shows.update({
+        if (updatedBooksStatus.count > 0) {
+            const updatedSchedules = await prisma.schedules.findMany({
                 where : {
-                    showId : updatedBooksStatus.showId
-                },
-                data : {
-                    category : 'past'
+                    dateTime : {
+                        lt : nowDateTime
+                    },
+                    booksStatus : 'impossible'
                 }
             })
+
+            for (const schedule of updatedSchedules) {
+                await prisma.shows.update({
+                    where : {
+                        showId : schedule.showId
+                    },
+                    data : {
+                        category : 'past'
+                    }
+                })
+            }
         }
     }
 }
