@@ -7,7 +7,7 @@ export class BooksRepository {
             data : {
                 scheduleId : +scheduleId,
                 userId : +userId,
-                showId : +showId
+                showId : +showId,
             }
         }) 
         }
@@ -58,6 +58,7 @@ export class BooksRepository {
                 userId : true,
                 scheduleId : true,
                 showId : true,
+                kind : true,
                 schedule : {
                     select : {
                         date : true,
@@ -88,6 +89,33 @@ export class BooksRepository {
             where : {
                 bookId : +bookId,
                 userId : +userId
+            }
+        })
+    }
+
+    findBookedUsers = async(showId, scheduleId, userId) => {
+        const bookedUsers = await prisma.books.findMany({
+            where : {
+                showId : +showId,
+                scheduleId : +scheduleId,
+                userId : +userId
+            }
+        })
+        return bookedUsers
+    }
+
+    deleteBooks = async(bookId) => {
+        await prisma.books.delete({
+            where : {
+                bookId
+            }
+        })
+    }
+
+    deleteByScheduleId = async(scheduleId) => {
+        await prisma.books.deleteMany({
+            where : {
+                scheduleId : +scheduleId
             }
         })
     }

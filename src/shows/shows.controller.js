@@ -65,4 +65,19 @@ export class ShowsController {
             return res.status(400).json({ message : error.message })
         }
     }
+
+    deleteShow = async(req, res) => {
+        try {
+            const { email, userId, role } = req.user
+            const { showId } = req.params
+            const { password } = req.body
+
+            await this.showsService.deleteShow(email, userId, role, showId, password)
+
+            return res.status(200).json({ message : '공연 삭제 완료'})
+        } catch (error) {
+            return res.status(400).json({ message : error.message })
+        }
+        
+    }
 }

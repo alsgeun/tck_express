@@ -55,6 +55,7 @@ export class ShowsRepository {
             },
             select : {
                 showId : true,
+                userId : true,
                 showName : true,
                 description : true,
                 category : true,
@@ -180,5 +181,13 @@ export class ShowsRepository {
                 })
             }
         }
+    }
+
+    deleteShow = async(showId) => {
+        await prisma.shows.delete({
+            where : {
+                showId : +showId
+            }
+        })
     }
 }

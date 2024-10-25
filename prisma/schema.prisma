@@ -23,6 +23,7 @@ model Users {
 
   shows Shows[]
   books Books[]
+  refunds Refunds[]
   @@map("Users")
 }
 
@@ -42,7 +43,7 @@ model Shows {
   performer String @map("performer")
   image String? @map("image")
 
-  user Users @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  user Users @relation(fields: [userId], references: [userId])
   schedules Schedules[]
   books Books[]
   @@unique([userId, showName])
@@ -67,7 +68,7 @@ model Schedules {
   dateTime DateTime @map("dateTime")
   booksStatus books @map("booksStatus")
 
-  show Shows @relation(fields: [showId], references: [showId], onDelete: Cascade)
+  show Shows @relation(fields: [showId], references: [showId])
   seats Seats?
   books Books[]
   @@map("Schedules")
@@ -84,7 +85,7 @@ model Seats {
   availableSeat Int @map("availableSeat")
   totalSeat Int @map("totalSeat")
 
-  schedules Schedules @relation(fields: [scheduleId], references: [scheduleId], onDelete: Cascade)
+  schedules Schedules @relation(fields: [scheduleId], references: [scheduleId])
   @@map("Seats")
 }
 
@@ -94,8 +95,18 @@ model Books {
   scheduleId Int @map("scheduleId")
   showId Int @map("showId")
 
-  user Users @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  schedule Schedules @relation(fields: [scheduleId], references: [scheduleId], onDelete: Cascade)
-  show Shows @relation(fields: [showId], references: [showId], onDelete: Cascade)
+  user Users @relation(fields: [userId], references: [userId])
+  schedule Schedules @relation(fields: [scheduleId], references: [scheduleId])
+  show Shows @relation(fields: [showId], references: [showId])
   @@map("Books")
+}
+
+model Refunds {
+  refundId Int @id @unique @default(autoincrement()) @map("refundId")
+  userId Int @map("userId")
+  date String @map("date")
+  time  String  @map("time")
+  refundPoints Int @map("refundPoints")
+  
+  user Users @relation(fields: [userId], references: [userId])
 }

@@ -20,7 +20,8 @@ export class SchedulesRepository {
                 },
                 seats : {
                     select : {
-                        availableSeat : true
+                        availableSeat : true,
+                        totalSeat : true
                     }
                 }
             }
@@ -46,6 +47,14 @@ export class SchedulesRepository {
             },
             data : {
                 booksStatus : 'possible'
+            }
+        })
+    }
+
+    deleteSchedule = async(scheduleId) => {
+        await prisma.schedules.delete({
+            where : {
+                scheduleId : +scheduleId
             }
         })
     }

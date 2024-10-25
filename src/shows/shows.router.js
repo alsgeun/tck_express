@@ -10,5 +10,6 @@ router.post('/', authMiddleware, upload, showsController.register)
 router.post('/search', showsController.search)
 router.post('/:showId', showsController.detailShow)
 router.post('/:showId/standingBooks', authMiddleware, showsController.standing)
+router.delete('/:showId', authMiddleware, showsController.deleteShow)
 
 export default router

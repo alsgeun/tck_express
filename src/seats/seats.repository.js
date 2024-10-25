@@ -32,4 +32,12 @@ export class SeatsRepository {
         })
         return updatedSeat
     }
+
+    deleteSeat = async(scheduleId) => {
+        await prisma.seats.delete({
+            where : {
+                scheduleId : +scheduleId
+            }
+        })
+    }
 }

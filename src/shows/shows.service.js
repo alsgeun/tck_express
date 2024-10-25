@@ -3,6 +3,7 @@ import { SchedulesRepository } from "../schedules/schedules.repository.js"
 import { BooksRepository } from "../books/books.repository.js"
 import { UsersRepository } from "../users/users.repository.js"
 import { SeatsRepository } from "../seats/seats.repository.js"
+import { RefundsRepository } from "../refunds/refunds.repository.js"
 
 export class ShowsService {
     showsRepository = new ShowsRepository()
@@ -10,6 +11,7 @@ export class ShowsService {
     booksRepository = new BooksRepository()
     usersRepository = new UsersRepository()
     seatsRepository = new SeatsRepository()
+    refundsRepository = new RefundsRepository()
 
     register = async(userId, role, showName, description, category, venue, price, performer, image, date, time, totalSeat) => {
         
@@ -136,5 +138,78 @@ export class ShowsService {
         // 예매 후 매진시 예매 불가능으로 상태 변경
         if (updatedSeat.availableSeat === 0)
             await this.schedulesRepository.changeStatus(updatedSeat.scheduleId)
+    }
+
+    deleteShow = async(email, userId, role, showId, password) => {
+        if (!showId)
+            throw new Error('공연이 존재하지 않습니다.')
+        if (!password.length)
+            throw new Error('비밀번호를 입력해주세요.')
+        if (role === 'user')
+            throw new Error('권한이 없습니다.')
+
+        const comparePassword = await this.usersRepository.comparePassword(email, password)
+        if (comparePassword === false)
+            throw new Error('비밀번호가 일치하지 않습니다.')
+
+        const show = await this.showsRepository.findDetailShowWithId(showId)
+        if (userId !== show.userId)
+            throw new Error('권한이 없습니다.')
+
+        // 현재시간을 가져와서 utc 시간 -> 서울 시간 변환
+        const currentDateTime = new Date()
+        const optionsDate = {
+            timeZone: 'Asia/Seoul',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }
+        const optionsTime = {
+            timeZone: 'Asia/Seoul',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false,
+        }
+
+        const seoulDateParts = new Intl.DateTimeFormat('ko-KR', optionsDate).formatToParts(currentDateTime)
+        const year = seoulDateParts.find(part => part.type === 'year').value;
+        const month = seoulDateParts.find(part => part.type === 'month').value;
+        const day = seoulDateParts.find(part => part.type === 'day').value;
+        const refundDate = `${year}-${month}-${day}`
+
+        const seoulTimeString = new Intl.DateTimeFormat('ko-KR', optionsTime).format(currentDateTime)
+        const refundTime = seoulTimeString.trim()
+
+        // 포인트 원상 복구
+        if (show.schedules.length > 0) {
+            for (const schedule of show.schedules) {
+                const seats = await this.schedulesRepository.findSchedules(schedule.scheduleId)
+                if (seats && seats.seats.totalSeat !== seats.seats.availableSeat) {
+                    const bookedSeats = seats.seats.totalSeat - seats.seats.availableSeat
+                    const userBooks = await this.booksRepository.findBookedUsers(showId, schedule.scheduleId, userId)
+                    const user = await this.usersRepository.findByUser(email)
+
+                    // 포인트 환불
+                    const refundAPoints = bookedSeats * show.price
+                    const updatePoints = user.points + refundAPoints
+                    for (const userId of userBooks) {
+                        await this.usersRepository.updatePoints(userId.userId, updatePoints)
+                    }
+
+                    for (const book of userBooks) {
+                        await this.booksRepository.deleteBooks(book.bookId)
+                        // 환불 내역 생성
+                        const aaa = await this.refundsRepository.refundRecords(book.userId, refundAPoints, refundDate, refundTime, bookedSeats)
+                    }
+                }
+                await this.seatsRepository.deleteSeat(schedule.scheduleId)
+            }
+            for (const schedule of show.schedules) {
+                await this.booksRepository.deleteByScheduleId(schedule.scheduleId)
+                await this.schedulesRepository.deleteSchedule(schedule.scheduleId)
+            }
+        }
+        await this.showsRepository.deleteShow(showId)
     }
 }
