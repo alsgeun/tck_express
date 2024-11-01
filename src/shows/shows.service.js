@@ -200,7 +200,7 @@ export class ShowsService {
                     for (const book of userBooks) {
                         await this.booksRepository.deleteBooks(book.bookId)
                         // 환불 내역 생성
-                        const aaa = await this.refundsRepository.refundRecords(book.userId, refundAPoints, refundDate, refundTime, bookedSeats)
+                        await this.refundsRepository.refundRecords(book.userId, refundAPoints, refundDate, refundTime, bookedSeats)
                     }
                 }
                 await this.seatsRepository.deleteSeat(schedule.scheduleId)
