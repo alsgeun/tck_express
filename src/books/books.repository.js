@@ -58,7 +58,6 @@ export class BooksRepository {
                 userId : true,
                 scheduleId : true,
                 showId : true,
-                kind : true,
                 schedule : {
                     select : {
                         date : true,
