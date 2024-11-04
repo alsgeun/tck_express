@@ -3,7 +3,7 @@ import { prisma } from '../../prisma/index.js'
 export class RefundsRepository {
     refundRecords = async(userId, points, date, time,  seatEa) => {
         for (let i = 0; i < seatEa; i++) {
-            const aaa = await prisma.refunds.create({
+            const refundRecords = await prisma.refunds.create({
                 data : {
                     userId : +userId,
                     date,
@@ -11,7 +11,7 @@ export class RefundsRepository {
                     refundPoints : +points
                 }
             })
-            return aaa
+            return refundRecords
         }
     }
 
