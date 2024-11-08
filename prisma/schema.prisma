@@ -109,4 +109,5 @@ model Refunds {
   refundPoints Int @map("refundPoints")
   
   user Users @relation(fields: [userId], references: [userId])
+  @@map("Refunds")
 }
